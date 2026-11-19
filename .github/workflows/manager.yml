@@ -122,7 +122,8 @@ jobs:
         run: |
           set -eux
           java -version
-          apksigner --version
+          APKSIGNER=$(find ${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools -name apksigner 2>/dev/null | head -n 1 || true)
+          if [ -n "$APKSIGNER" ]; then "$APKSIGNER" --version || true; fi
           python3 --version
 
       - name: Download ksud artifacts
@@ -315,7 +316,8 @@ jobs:
         run: |
           set -eux
           java -version
-          apksigner --version
+          APKSIGNER=$(find ${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools -name apksigner 2>/dev/null | head -n 1 || true)
+          if [ -n "$APKSIGNER" ]; then "$APKSIGNER" --version || true; fi
           python3 --version
 
       - name: Download artifacts
