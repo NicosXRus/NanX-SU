@@ -53,14 +53,18 @@ jobs:
           targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
 
       - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+        continue-on-error: true
+
+      - name: Sync CI artifact root
         run: |
           set -eux
           . .github/scripts/ci/common.sh
           mkdir -p artifacts
-          # Every pack_* input below reads from ./artifacts, so mirror the whole
-          # per-run artifact root here and let the individual steps pick.
           if [ -d "$CI_ARTIFACT_ROOT" ]; then
-            cp -a "$CI_ARTIFACT_ROOT"/. artifacts/
+            cp -a "$CI_ARTIFACT_ROOT"/. artifacts/ || true
           fi
           ls -la artifacts || true
 
@@ -68,17 +72,26 @@ jobs:
         if: ${{ inputs.pack_lkm }}
         run: |
           set -eux
-          cp artifacts/aarch64-android*-lkm/*_kernelsu.ko ./userspace/ksud/bin/aarch64/
-          cp artifacts/x86_64-android*-lkm/*_kernelsu.ko ./userspace/ksud/bin/x86_64/
+          mkdir -p ./userspace/ksud/bin/aarch64/ ./userspace/ksud/bin/x86_64/
+          shopt -s nullglob
+          files=(artifacts/aarch64-android*-lkm/*_kernelsu.ko)
+          if [ ${#files[@]} -gt 0 ]; then
+            cp "${files[@]}" ./userspace/ksud/bin/aarch64/ || true
+          fi
+          files_x86=(artifacts/x86_64-android*-lkm/*_kernelsu.ko)
+          if [ ${#files_x86[@]} -gt 0 ]; then
+            cp "${files_x86[@]}" ./userspace/ksud/bin/x86_64/ || true
+          fi
 
       - name: Prepare ksuinit
         if: ${{ inputs.pack_ksuinit }}
         run: |
           set -eux
-          mv artifacts/ksuinit-aarch64/ksuinit ./userspace/ksud/bin/aarch64/
-          mv artifacts/ksuinit-arm/ksuinit ./userspace/ksud/bin/arm/
-          mv artifacts/ksuinit-x86_64/ksuinit ./userspace/ksud/bin/x86_64/
-          mv artifacts/ksuinit-riscv64/ksuinit ./userspace/ksud/bin/riscv64/
+          mkdir -p ./userspace/ksud/bin/aarch64/ ./userspace/ksud/bin/arm/ ./userspace/ksud/bin/x86_64/ ./userspace/ksud/bin/riscv64/
+          [ -f artifacts/ksuinit-aarch64/ksuinit ] && cp -f artifacts/ksuinit-aarch64/ksuinit ./userspace/ksud/bin/aarch64/ || true
+          [ -f artifacts/ksuinit-arm/ksuinit ] && cp -f artifacts/ksuinit-arm/ksuinit ./userspace/ksud/bin/arm/ || true
+          [ -f artifacts/ksuinit-x86_64/ksuinit ] && cp -f artifacts/ksuinit-x86_64/ksuinit ./userspace/ksud/bin/x86_64/ || true
+          [ -f artifacts/ksuinit-riscv64/ksuinit ] && cp -f artifacts/ksuinit-riscv64/ksuinit ./userspace/ksud/bin/riscv64/ || true
 
       - name: Prepare BuiltZygisk
         if: ${{ inputs.pack_builtzygisk }}
