@@ -67,7 +67,7 @@ impl ErofsWriter {
             .with_context(|| format!("Failed to create output file {}", output_path.display()))?;
 
         // Initialize empty buffer for header
-        let mut buffer = vec![0u8; EROFS_BLOCK_SIZE * 2]; // Pre-allocate first 2 blocks for zero-fill & superblock
+        let buffer = vec![0u8; EROFS_BLOCK_SIZE * 2]; // Pre-allocate first 2 blocks for zero-fill & superblock
 
         // Write initial zero block + superblock space
         file.write_all(&buffer)?;
@@ -138,9 +138,10 @@ impl ErofsWriter {
                 payload.extend_from_slice(&name_bytes);
             }
 
+            let payload_len = payload.len();
             let compact_inode = ErofsInodeCompact {
                 format: 0, // Flat plain inode
-                ondisk_size: payload.len() as u16,
+                ondisk_size: payload_len as u16,
                 ino: nid as u32 + 1,
                 nid: nid as u32,
                 uid: node.uid as u16,
@@ -163,7 +164,7 @@ impl ErofsWriter {
             inode_records.push((nid, header_bytes, payload));
 
             // Align data block counter
-            let blocks_needed = (payload.len() + EROFS_BLOCK_SIZE - 1) / EROFS_BLOCK_SIZE;
+            let blocks_needed = (payload_len + EROFS_BLOCK_SIZE - 1) / EROFS_BLOCK_SIZE;
             current_block += blocks_needed as u32;
         }
 

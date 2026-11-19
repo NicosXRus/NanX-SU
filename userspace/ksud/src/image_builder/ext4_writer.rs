@@ -176,10 +176,7 @@ impl Ext4Writer {
         for (path, node) in &tree.nodes {
             let ino = *inode_map.get(path).unwrap();
 
-            let mut block_ptr = 0u32;
-            let mut file_size = 0u32;
-
-            match &node.node_type {
+            let (block_ptr, file_size) = match &node.node_type {
                 VfsNodeType::RegularFile { content } => {
                     file_size = content.len() as u32;
                     block_ptr = current_block;

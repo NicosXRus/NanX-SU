@@ -8,7 +8,7 @@ pub mod ext4_writer;
 pub mod vfs_tree;
 
 use std::path::{Path, PathBuf};
-use anyhow::{Context, Result};
+use anyhow::Result;
 use log::info;
 
 pub use erofs_writer::ErofsWriter;
