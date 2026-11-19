@@ -47,7 +47,9 @@ kernelsu-objs += extension/susfs_extension.o
 kernelsu-objs += extension/version_spoof.o
 kernelsu-objs += extension/nomount_extension.o
 
-kernelsu-objs += runtime/boot_event.o
+kernelsu-objs += feature/avc_spoof.o
+kernelsu-objs += feature/vpn_hide.o
+kernelsu-objs += feature/selinux_learning.o
 kernelsu-objs += runtime/ksud_integration.o
 
 kernelsu-objs += infra/btf_parser.o

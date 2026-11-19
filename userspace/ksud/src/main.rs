@@ -50,6 +50,8 @@ mod magica;
 #[cfg(target_os = "android")]
 mod metamodule;
 pub mod nomount;
+pub mod terminal;
+pub mod vpn_hide;
 #[cfg(target_os = "android")]
 mod module;
 #[cfg(target_os = "android")]

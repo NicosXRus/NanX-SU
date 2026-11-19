@@ -280,6 +280,37 @@ private fun AppProfileInner(
                 onEnabledChange = onTemporaryRootChange,
                 onChoose = onTemporaryRootGrant,
             )
+
+            var vpnHideEnabled by remember { mutableStateOf(false) }
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "VPNHide (Hide Active VPN)",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "Hide tun0/wg0 interface and TRANSPORT_VPN capabilities from this app",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = vpnHideEnabled,
+                        onCheckedChange = { vpnHideEnabled = it }
+                    )
+                }
+            }
         }
 
         Crossfade(targetState = isRootGranted, label = "") { current ->
