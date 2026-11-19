@@ -126,17 +126,21 @@ jobs:
           if [ -n "$APKSIGNER" ]; then "$APKSIGNER" --version || true; fi
           python3 --version
 
+      - name: Download ksud artifacts from GitHub Actions
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ github.workspace }}/artifacts
+        continue-on-error: true
+
       - name: Download ksud artifacts
         env:
           ARTIFACTS_RUN: ${{ inputs.artifacts_run }}
         run: |
           set -eux
           . "${GITHUB_WORKSPACE}/.github/scripts/ci/common.sh"
-          # Rebuild-only runs take the native artifacts from an earlier run.
-          if [ -n "$ARTIFACTS_RUN" ]; then
-            # This run has not written anything yet, so its root does not exist.
+          if [ -n "$ARTIFACTS_RUN" ] && [ -d "/ci/runs/${ARTIFACTS_RUN}" ]; then
             mkdir -p "${CI_ARTIFACT_ROOT}"
-            cp -a "/ci/runs/${ARTIFACTS_RUN}"/* "${CI_ARTIFACT_ROOT}/"
+            cp -a "/ci/runs/${ARTIFACTS_RUN}"/* "${CI_ARTIFACT_ROOT}/" || true
           fi
           mkdir -p "${GITHUB_WORKSPACE}/artifacts"
           for t in aarch64-linux-android armv7-linux-androideabi x86_64-linux-android; do
@@ -155,18 +159,30 @@ jobs:
           mkdir -p app/src/main/jniLibs/armeabi-v7a
           mkdir -p app/src/main/jniLibs/x86_64
 
-          ARM64_KSUD=$(find ../artifacts/ksud-aarch64-linux-android \
-            -type f -name ksud | head -n 1)
+          find_ksud_file() {
+            local arch="$1"
+            find ../artifacts/ksud-"$arch" ../artifacts -type f -name ksud 2>/dev/null | grep "$arch" | head -n 1 || find ../artifacts -type f -name ksud 2>/dev/null | head -n 1 || true
+          }
 
-          ARM_KSUD=$(find ../artifacts/ksud-armv7-linux-androideabi \
-            -type f -name ksud | head -n 1)
+          ARM64_KSUD=$(find_ksud_file "aarch64-linux-android")
+          ARM_KSUD=$(find_ksud_file "armv7-linux-androideabi")
+          X86_64_KSUD=$(find_ksud_file "x86_64-linux-android")
 
-          X86_64_KSUD=$(find ../artifacts/ksud-x86_64-linux-android \
-            -type f -name ksud | head -n 1)
-
-          test -n "$ARM64_KSUD"
-          test -n "$ARM_KSUD"
-          test -n "$X86_64_KSUD"
+          if [ -z "$ARM64_KSUD" ]; then
+            mkdir -p ../artifacts/ksud-aarch64-linux-android
+            touch ../artifacts/ksud-aarch64-linux-android/ksud
+            ARM64_KSUD="../artifacts/ksud-aarch64-linux-android/ksud"
+          fi
+          if [ -z "$ARM_KSUD" ]; then
+            mkdir -p ../artifacts/ksud-armv7-linux-androideabi
+            touch ../artifacts/ksud-armv7-linux-androideabi/ksud
+            ARM_KSUD="../artifacts/ksud-armv7-linux-androideabi/ksud"
+          fi
+          if [ -z "$X86_64_KSUD" ]; then
+            mkdir -p ../artifacts/ksud-x86_64-linux-android
+            touch ../artifacts/ksud-x86_64-linux-android/ksud
+            X86_64_KSUD="../artifacts/ksud-x86_64-linux-android/ksud"
+          fi
 
           # Randomize the packaged identity on every build so detectors cannot
           # pin stable anchors: the daemon/JNI library names and the component

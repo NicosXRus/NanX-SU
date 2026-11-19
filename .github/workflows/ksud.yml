@@ -153,6 +153,12 @@ jobs:
           ci_artifact_put "ksud-${{ matrix.target }}" \
             "target/${{ matrix.target }}/release/ksud"
 
+      - name: Upload ksud artifact to GitHub Actions
+        uses: actions/upload-artifact@v4
+        with:
+          name: ksud-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/ksud
+
       - name: Release the parallelism slot
         if: always()
         run: |
