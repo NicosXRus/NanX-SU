@@ -271,14 +271,13 @@ jobs:
           # anyway and cleaning only threw away what --build-cache could reuse.
           # The cache lives in GRADLE_USER_HOME (/ci/tools/gradle), which persists.
           kpm=app/build/generated/kpmTools
-          if [ ! -s "$kpm/assets/kpm/kpimg" ] || [ ! -s "$kpm/jniLibs/arm64-v8a/libkptools.so" ]; then
-            # downloadKpmTools would fetch these from raw.githubusercontent.com;
-            # the image already carries them, so only seed when missing.
+          if [ -d "/opt/kpm-tools" ]; then
             mkdir -p "$kpm/jniLibs/arm64-v8a" "$kpm/assets/kpm"
-            cp -f /opt/kpm-tools/kptools-android "$kpm/jniLibs/arm64-v8a/libkptools.so"
-            cp -f /opt/kpm-tools/kpimg "$kpm/assets/kpm/kpimg"
+            [ -f /opt/kpm-tools/kptools-android ] && cp -f /opt/kpm-tools/kptools-android "$kpm/jniLibs/arm64-v8a/libkptools.so" || true
+            [ -f /opt/kpm-tools/kpimg ] && cp -f /opt/kpm-tools/kpimg "$kpm/assets/kpm/kpimg" || true
           fi
-          gradle --build-cache -Dorg.gradle.parallel=true \
+          chmod +x ./gradlew || true
+          ./gradlew --build-cache -Dorg.gradle.parallel=true \
             assembleRelease ${PR_BUILD_FLAG:+-PIS_PR_BUILD=true}
 
       # --------------------------------------------------------
