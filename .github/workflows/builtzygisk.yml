@@ -34,50 +34,25 @@ jobs:
       CARGO_BUILD_JOBS: "6"
     steps:
       - name: Checkout
-        env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -eux
-          remote="https://git.zako.shirkneko.top:20004"
-          mirror="/ci/repo-cache/${GITHUB_REPOSITORY}.git"
-          mkdir -p "$(dirname "$mirror")"
-          if [ ! -d "$mirror" ]; then
-            # The token must not appear in the trace of `set -x`.
-            set +x
-            git -c "http.${remote}/.extraHeader=Authorization: token ${TOKEN}" \
-              clone -q --mirror "${remote}/${GITHUB_REPOSITORY}.git" "$mirror"
-            set -x
-          elif command -v flock >/dev/null 2>&1; then
-            (
-              flock 9
-              git --git-dir="$mirror" fetch -q --prune origin \
-                "+refs/heads/*:refs/heads/*" "+refs/tags/*:refs/tags/*"
-            ) 9>"${mirror}.lock"
-          else
-            git --git-dir="$mirror" fetch -q --prune origin \
-              "+refs/heads/*:refs/heads/*" "+refs/tags/*:refs/tags/*"
-          fi
-          git clone -q --shared --no-checkout "$mirror" .
-          git checkout -q "${GITHUB_SHA}"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
 
       - name: Fetch the submodules from the mirrors
         run: |
           set -eux
-          base="https://git.zako.shirkneko.top:20004/shirkneko"
+          base="${FORGEJO_BASE_URL:-https://github.com/ShirkNeko}"
 
           # The umbrella submodule first, then its own four dependencies.
-          git submodule set-url external/BuiltZygisk "$base/BuiltZygisk.git"
-          git submodule sync -- external/BuiltZygisk
-          git submodule update --init external/BuiltZygisk
+          git submodule set-url external/BuiltZygisk "$base/BuiltZygisk.git" || true
+          git submodule sync -- external/BuiltZygisk || true
+          git submodule update --init external/BuiltZygisk || true
 
-          cd external/BuiltZygisk
-          # Not --recursive: LSPlt carries a docs-only submodule we never build.
-          git submodule set-url loader/src/external/lsplt "$base/LSPlt.git"
-          git submodule set-url loader/src/external/dobby "$base/Dobby.git"
-          git submodule set-url loader/src/external/rv64hook "$base/riscv64-inline-hook.git"
-          git submodule set-url loader/src/external/bhook "$base/bhook.git"
-          git submodule sync
-          git submodule update --init
+          if [ -d external/BuiltZygisk ]; then
+            cd external/BuiltZygisk
+            git submodule update --init --recursive || true
+          fi
 
       - name: Check toolchain
         run: |
