@@ -45,6 +45,7 @@ kernelsu-objs += extension/cpu_spoof.o
 kernelsu-objs += extension/umount_paths.o
 kernelsu-objs += extension/susfs_extension.o
 kernelsu-objs += extension/version_spoof.o
+kernelsu-objs += extension/nomount_extension.o
 
 kernelsu-objs += runtime/boot_event.o
 kernelsu-objs += runtime/ksud_integration.o
@@ -177,7 +178,7 @@ obj-$(CONFIG_KSU) += kernelsu.o
 MDIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 REPO_OWNER  := shirkneko
-REPO_NAME   := SukiSU
+REPO_NAME   := NanX-SU
 REPO_BRANCH := main
 
 VERSION_BASE    := 30000
@@ -210,9 +211,9 @@ ccflags-y += -DKSU_VERSION_FULL=\"$(KSU_VERSION_FULL)\"
 
 KSU_IS_PR_BUILD ?= 0
 ifeq ($(KSU_IS_PR_BUILD),0)
-KSU_PACKAGE_NAME ?= com.sukisu.nova
+KSU_PACKAGE_NAME ?= com.nanx.su
 else
-KSU_PACKAGE_NAME ?= com.sukisu.nova.pr
+KSU_PACKAGE_NAME ?= com.nanx.su.pr
 endif
 KSU_EXPECTED_SIZE ?= 0x35c
 KSU_EXPECTED_HASH ?= 947ae944f3de4ed4c21a7e4f7953ecf351bfa2b36239da37a34111ad29993eef

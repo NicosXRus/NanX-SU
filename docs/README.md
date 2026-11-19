@@ -1,19 +1,14 @@
-# SukiSU Nova
-<img align='right' src='SukiSU-mini.svg' width='220px' alt="SukiSU Nova logo">
+# NanX-SU
+<img align='right' src='SukiSU-mini.svg' width='220px' alt="NanX-SU logo">
 
 **English** [简体中文](./zh/README.md) |
 
-A kernel-based root solution for Android, evolved from [`tiann/KernelSU`](https://github.com/tiann/KernelSU) with some interesting changes added.
-
-[![Latest Release](https://img.shields.io/github/v/release/SukiSU-Nova/SukiSU-Nova?label=Release&logo=github)](https://github.com/SukiSU-Nova/SukiSU-Nova/releases/latest)
-[![Channel](https://img.shields.io/badge/Follow-Telegram-blue.svg?logo=telegram)](https://t.me/Sukiksu)
-[![License: GPL 3.0 or later](https://img.shields.io/badge/License-GPL%203.0%20or%20later-orange.svg?logo=gnu)](https://www.gnu.org/licenses/gpl-3.0.html)
-[![GitHub License](https://img.shields.io/github/license/SukiSU-Nova/SukiSU-Nova?logo=gnu)](/LICENSE)
+A kernel-based root solution for Android, evolved from SukiSU Nova with advanced enhancements.
 
 ## Features
 
 1. Kernel-based `su` and permission management.
-2. [App Profile](https://sukisu.org/guide/app-profile): keep root access in a cage.
+2. App Profile: keep root access in a cage.
 3. KPM support.
 4. Built-in Zygisk (NyaZygisk) — no separate Zygisk module needed; running status is shown right on the home screen.
 5. Theme Store: browse, install and submit themes, with multi-source mirrors, author authorization and review.
@@ -23,7 +18,7 @@ A kernel-based root solution for Android, evolved from [`tiann/KernelSU`](https:
 
 ## Compatibility
 
-- SukiSU Nova supports GKI 2.0 devices (kernel version 5.10 and above).
+- NanX-SU supports GKI 2.0 devices (kernel version 5.10 and above).
 - Older kernels are also compatible (minimum 4.14+), but you need to compile the kernel yourself.
 - With additional backports, 3.x kernels (3.4–3.18) can be supported.
 - Currently supported architectures: `arm64-v8a`, `armeabi-v7a (bare)`, `X86_64`, `riscv64`.

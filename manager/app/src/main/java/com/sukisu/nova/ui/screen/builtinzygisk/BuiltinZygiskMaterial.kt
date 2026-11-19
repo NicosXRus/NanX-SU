@@ -338,6 +338,30 @@ internal fun BuiltinZygiskMaterial(
                                     checked = uiState.config.pltEngine == "lsplt",
                                     onCheckedChange = { onSetOption("plt_engine", if (it) "lsplt" else "bytehook") }
                                 )
+                            },
+                            {
+                                SegmentedSwitchItem(
+                                    title = stringResource(R.string.builtin_zygisk_opt_selective_injection),
+                                    summary = stringResource(R.string.builtin_zygisk_opt_selective_injection_summary),
+                                    checked = uiState.config.selectiveInjection,
+                                    onCheckedChange = { onSetOption("selective_injection", if (it) "1" else "0") }
+                                )
+                            },
+                            {
+                                SegmentedSwitchItem(
+                                    title = stringResource(R.string.builtin_zygisk_opt_solist_masking),
+                                    summary = stringResource(R.string.builtin_zygisk_opt_solist_masking_summary),
+                                    checked = uiState.config.solistMasking,
+                                    onCheckedChange = { onSetOption("solist_masking", if (it) "1" else "0") }
+                                )
+                            },
+                            {
+                                SegmentedSwitchItem(
+                                    title = stringResource(R.string.builtin_zygisk_opt_header_stripping),
+                                    summary = stringResource(R.string.builtin_zygisk_opt_header_stripping_summary),
+                                    checked = uiState.config.headerStripping,
+                                    onCheckedChange = { onSetOption("header_stripping", if (it) "1" else "0") }
+                                )
                             }
                         )
                     )

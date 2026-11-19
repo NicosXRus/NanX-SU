@@ -542,6 +542,18 @@ class SettingsRepositoryImpl : SettingsRepository {
         get() = prefs.getBoolean(KEY_USE_SOFT_REBOOT, false)
         set(value) = prefs.edit { putBoolean(KEY_USE_SOFT_REBOOT, value) }
 
+    override var mountEngine: String
+        get() = prefs.getString("mount_engine", "overlayfs") ?: "overlayfs"
+        set(value) = prefs.edit { putString("mount_engine", value) }
+
+    override var autoRebuildContainerImage: Boolean
+        get() = prefs.getBoolean("auto_rebuild_container_image", true)
+        set(value) = prefs.edit { putBoolean("auto_rebuild_container_image", value) }
+
+    override var enableLoopDeviceMasking: Boolean
+        get() = prefs.getBoolean("enable_loop_device_masking", true)
+        set(value) = prefs.edit { putBoolean("enable_loop_device_masking", value) }
+
     override val intentToken: String
         get() {
         val existing = prefs.getString(INTENT_TOKEN_KEY, null)

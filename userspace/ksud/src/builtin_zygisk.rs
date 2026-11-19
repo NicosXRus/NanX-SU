@@ -1757,6 +1757,9 @@ const CONFIG_KEYS: &[(&str, &[&str], &str)] = &[
     ("anonymous_memory", &["0", "1"], "0"),
     ("custom_linker", &["0", "1"], "0"),
     ("plt_engine", &["bytehook", "lsplt"], "bytehook"),
+    ("selective_injection", &["0", "1"], "0"),
+    ("solist_masking", &["0", "1"], "0"),
+    ("header_stripping", &["0", "1"], "0"),
 ];
 
 fn config_path() -> PathBuf {

@@ -1481,6 +1481,9 @@ data class BuiltinZygiskConfig(
     val customLinker: Boolean = false,
     // "bytehook" or "lsplt"
     val pltEngine: String = "bytehook",
+    val selectiveInjection: Boolean = false,
+    val solistMasking: Boolean = false,
+    val headerStripping: Boolean = false,
 )
 
 fun getBuiltinZygiskConfig(): BuiltinZygiskConfig {
@@ -1492,6 +1495,9 @@ fun getBuiltinZygiskConfig(): BuiltinZygiskConfig {
             anonymousMemory = json.optString("anonymous_memory") == "1",
             customLinker = json.optString("custom_linker") == "1",
             pltEngine = json.optString("plt_engine", "bytehook").ifEmpty { "bytehook" },
+            selectiveInjection = json.optString("selective_injection") == "1",
+            solistMasking = json.optString("solist_masking") == "1",
+            headerStripping = json.optString("header_stripping") == "1",
         )
     }.getOrDefault(BuiltinZygiskConfig())
 }

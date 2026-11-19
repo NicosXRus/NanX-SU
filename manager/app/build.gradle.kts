@@ -25,8 +25,8 @@ val managerVersionCode = rootProject.extra["managerVersionCode"] as Int
 val managerVersionName = rootProject.extra["managerVersionName"] as String
 
 val isPrBuild = project.findProperty("IS_PR_BUILD")?.toString()?.toBoolean() ?: false
-val defaultManagerPackageName = if (isPrBuild) "com.sukisu.nova.pr" else "com.sukisu.nova"
-val defaultManagerName = if (isPrBuild) "SukiSU PR" else "SukiSU Nova"
+val defaultManagerPackageName = if (isPrBuild) "com.nanx.su.pr" else "com.nanx.su"
+val defaultManagerName = if (isPrBuild) "NanX-SU PR" else "NanX-SU"
 val managerPackageName = project.findProperty("KSU_PACKAGE_NAME")?.toString() ?: defaultManagerPackageName
 val managerName = project.findProperty("KSU_NAME")?.toString() ?: defaultManagerName
 

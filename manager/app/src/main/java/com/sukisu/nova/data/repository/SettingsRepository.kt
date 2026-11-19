@@ -125,6 +125,9 @@ interface SettingsRepository {
     var autoJailbreak: Boolean
     var builtinZygisk: Boolean
     var useSoftReboot: Boolean
+    var mountEngine: String
+    var autoRebuildContainerImage: Boolean
+    var enableLoopDeviceMasking: Boolean
     val intentToken: String
 
     suspend fun getSuCompatStatus(): String

@@ -133,6 +133,9 @@ pub fn apply(module_id: &str, is_metamodule: bool, request: &Request) -> bool {
     };
     info!("Module {module_id} hot installed");
 
+    // Automatically trigger rebuild of container image if Image Container mode is active
+    let _ = crate::nomount::rebuild_container_image(crate::image_builder::ImageFormat::Erofs);
+
     let live_dir = Path::new(defs::MODULE_DIR).join(module_id);
 
     // Rules are additive, so loading the new ones now is safe; stale ones go away on reboot
