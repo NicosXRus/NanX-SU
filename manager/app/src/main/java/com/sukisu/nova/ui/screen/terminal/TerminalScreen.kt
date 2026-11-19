@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sukisu.nova.ui.util.KsuCliKt
+import com.sukisu.nova.ui.util.execRootCmd
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +34,7 @@ fun TerminalScreen(
         logs.add("# $cmd")
         commandInput = ""
 
-        val output = KsuCliKt.execRootCmd(cmd)
+        val output = execRootCmd(cmd)
         if (output.isNotBlank()) {
             logs.add(output)
         }

@@ -4,7 +4,7 @@ import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
-import com.sukisu.nova.ui.util.KsuCliKt
+import com.sukisu.nova.ui.util.rootAvailable
 
 @RequiresApi(Build.VERSION_CODES.N)
 class NanXQuickTileService : TileService() {
@@ -30,9 +30,9 @@ class NanXQuickTileService : TileService() {
 
     private fun updateTileState() {
         val tile = qsTile ?: return
-        val rootActive = KsuCliKt.rootAvailable()
-        tile.state = if (rootActive) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-        tile.label = if (rootActive) "NanX-SU: Active" else "NanX-SU: Standby"
+        val active = rootAvailable()
+        tile.state = if (active) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+        tile.label = if (active) "NanX-SU: Active" else "NanX-SU: Standby"
         tile.updateTile()
     }
 }
