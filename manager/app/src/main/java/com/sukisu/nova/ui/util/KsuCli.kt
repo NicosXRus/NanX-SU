@@ -661,6 +661,13 @@ fun rootAvailable(): Boolean {
     return shell.isRoot
 }
 
+fun execRootCmd(cmd: String): String {
+    return runCatching {
+        val shell = getRootShell()
+        ShellUtils.fastCmd(shell, cmd)
+    }.getOrDefault("")
+}
+
 suspend fun getCurrentKmi(): String = withContext(Dispatchers.IO) {
     val shell = getRootShell()
     val cmd = "boot-info current-kmi"
