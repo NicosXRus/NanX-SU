@@ -102,3 +102,9 @@ jobs:
             # under the keys aarch64/zygiskd etc, which its own lookups never find.
             ci_artifact_put "builtzygisk-$arch" "${GITHUB_WORKSPACE}/builtzygisk/$arch"/*
           done
+
+      - name: Upload BuiltZygisk artifacts to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: builtzygisk-payloads
+          path: ${{ github.workspace }}/builtzygisk/

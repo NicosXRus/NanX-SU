@@ -81,6 +81,15 @@ jobs:
           ci_artifact_put ksuinit-x86_64 \
             target/x86_64-linux-android/release/ksuinit
 
+      - name: Upload ksuinit to GitHub Actions Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ksuinit-binaries
+          path: |
+            target/aarch64-linux-android/release/ksuinit
+            target/armv7-linux-androideabi/release/ksuinit
+            target/x86_64-linux-android/release/ksuinit
+
   build-riscv64:
     runs-on: ${{ inputs.os }}
     steps:
@@ -118,3 +127,9 @@ jobs:
           . .github/scripts/ci/common.sh
           ci_artifact_put ksuinit-riscv64 \
             target/riscv64-linux-android/release/ksuinit
+
+      - name: Upload RISC-V ksuinit to GitHub Actions Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ksuinit-riscv64
+          path: target/riscv64-linux-android/release/ksuinit

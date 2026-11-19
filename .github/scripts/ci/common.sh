@@ -15,8 +15,12 @@ if [ -n "${BASH_VERSION:-}" ]; then
 	set -o pipefail
 fi
 
-CI_REMOTE="${CI_REMOTE:-https://git.zako.shirkneko.top:20004}"
-CI_ARTIFACT_ROOT="${CI_ARTIFACT_ROOT:-/ci/runs/${GITHUB_RUN_ID:-local}}"
+CI_REMOTE="${CI_REMOTE:-https://github.com}"
+if [ -d "/ci/runs" ] && [ -w "/ci/runs" ]; then
+	CI_ARTIFACT_ROOT="${CI_ARTIFACT_ROOT:-/ci/runs/${GITHUB_RUN_ID:-local}}"
+else
+	CI_ARTIFACT_ROOT="${CI_ARTIFACT_ROOT:-${RUNNER_TEMP:-/tmp}/ci-artifacts/${GITHUB_RUN_ID:-local}}"
+fi
 
 # ci_checkout [depth]
 #   depth 1 (default) fetches just the triggering commit. depth 0 fetches all
