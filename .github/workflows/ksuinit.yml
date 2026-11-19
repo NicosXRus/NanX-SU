@@ -14,8 +14,6 @@ jobs:
   build:
     runs-on: ${{ inputs.os }}
     env:
-      CARGO_HOME: ${{ github.workspace }}/.cargo
-      RUSTUP_HOME: ${{ github.workspace }}/.rustup
       # Same reason as MAKEFLAGS in ddk-lkm: cap per-job parallelism.
       CARGO_BUILD_JOBS: "6"
     steps:
@@ -24,12 +22,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
+
       - name: Check toolchain
         run: |
           set -eux
           rustup toolchain list
           rustup target list --installed
-          test -x "${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
 
       - name: Build ksuinit
         run: |
@@ -81,21 +83,23 @@ jobs:
 
   build-riscv64:
     runs-on: ${{ inputs.os }}
-    env:
-      CARGO_HOME: ${{ github.workspace }}/.cargo
-      RUSTUP_HOME: ${{ github.workspace }}/.rustup
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Setup Rust Nightly
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: riscv64-linux-android
+          components: rust-src
+
       - name: Check toolchain
         run: |
           set -eux
           rustup toolchain list
           rustup target list --installed
-          test -x "${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
 
       - name: Build RISC-V ksuinit
         run: |

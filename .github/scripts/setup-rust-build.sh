@@ -1,6 +1,15 @@
 # shellcheck shell=bash
 TRIPLE=$1
 ANDROID_SDK_LEVEL=$2
+
+if [ -z "${ANDROID_NDK_HOME:-}" ] || [ ! -d "${ANDROID_NDK_HOME:-}" ]; then
+  if [ -d "${ANDROID_HOME:-/usr/local/lib/android/sdk}/ndk" ]; then
+    export ANDROID_NDK_HOME="$(find ${ANDROID_HOME:-/usr/local/lib/android/sdk}/ndk -maxdepth 1 -mindepth 1 | sort -V | tail -n 1)"
+  elif [ -d "/opt/android-sdk/ndk" ]; then
+    export ANDROID_NDK_HOME="$(find /opt/android-sdk/ndk -maxdepth 1 -mindepth 1 | sort -V | tail -n 1)"
+  fi
+fi
+
 LLVM_PATH="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"
 LLVM_BIN="$LLVM_PATH/bin"
 NDK_TRIPLE=$TRIPLE

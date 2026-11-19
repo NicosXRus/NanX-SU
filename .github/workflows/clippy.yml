@@ -32,8 +32,6 @@ on:
 
 env:
   RUSTFLAGS: '-Dwarnings'
-  CARGO_HOME: ${{ github.workspace }}/.cargo
-  RUSTUP_HOME: ${{ github.workspace }}/.rustup
   # Cap per-job parallelism: several job containers run at once.
   CARGO_BUILD_JOBS: "6"
 
@@ -45,6 +43,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
 
       - name: Check toolchain
         run: |

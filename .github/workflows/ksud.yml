@@ -41,14 +41,16 @@ jobs:
         # reference matrix values.
         target: ${{ fromJson(inputs.targets_json) }}
     runs-on: ubuntu-latest
-    env:
-      CARGO_HOME: ${{ github.workspace }}/.cargo
-      RUSTUP_HOME: ${{ github.workspace }}/.rustup
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
 
       - name: Download artifacts
         run: |
