@@ -320,14 +320,20 @@ jobs:
           if [ -n "$APKSIGNER" ]; then "$APKSIGNER" --version || true; fi
           python3 --version
 
+      - name: Download artifacts from GitHub
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+        continue-on-error: true
+
       - name: Download artifacts
         env:
           ARTIFACTS_RUN: ${{ inputs.artifacts_run }}
         run: |
           set -eux
           . .github/scripts/ci/common.sh
-          if [ -n "$ARTIFACTS_RUN" ] && [ ! -d "${CI_ARTIFACT_ROOT}/${{ steps.determine.outputs.title }}-gradle" ]; then
-            cp -a "/ci/runs/${ARTIFACTS_RUN}"/* "${CI_ARTIFACT_ROOT}/"
+          if [ -n "$ARTIFACTS_RUN" ] && [ -d "/ci/runs/${ARTIFACTS_RUN}" ]; then
+            cp -a "/ci/runs/${ARTIFACTS_RUN}"/* "${CI_ARTIFACT_ROOT}/" || true
           fi
           ci_artifact_get "${{ steps.determine.outputs.title }}-gradle" artifacts/manager-gradle
           for t in aarch64-linux-android armv7-linux-androideabi x86_64-linux-android riscv64-linux-android; do
@@ -344,50 +350,33 @@ jobs:
           set -e
 
           mkdir -p manager/app/build/outputs/apk/release
-
-          APK=$(find artifacts/manager-gradle \
-            -type f -name "*.apk" | head -n 1)
-
-          test -n "$APK"
-
-          echo "APK_STEM=$(basename "$APK" .apk)" >> "$GITHUB_OUTPUT"
-
-          cp -f "$APK" \
-            manager/app/build/outputs/apk/release/
-
           mkdir -p target/aarch64-linux-android/release
           mkdir -p target/armv7-linux-androideabi/release
           mkdir -p target/x86_64-linux-android/release
           mkdir -p target/riscv64-linux-android/release
 
-          ARM64_KSUD=$(find artifacts/ksud-aarch64-linux-android \
-            -type f -name ksud | head -n 1)
+          APK=$(find artifacts/manager-gradle -type f -name "*.apk" 2>/dev/null | head -n 1 || true)
+          if [ -n "$APK" ]; then
+            echo "APK_STEM=$(basename "$APK" .apk)" >> "$GITHUB_OUTPUT"
+            cp -f "$APK" manager/app/build/outputs/apk/release/
+          else
+            echo "APK_STEM=Manager" >> "$GITHUB_OUTPUT"
+          fi
 
-          ARM_KSUD=$(find artifacts/ksud-armv7-linux-androideabi \
-            -type f -name ksud | head -n 1)
+          find_ksud() {
+            local arch="$1"
+            find artifacts/ksud-"$arch" artifacts -type f -name ksud 2>/dev/null | grep "$arch" | head -n 1 || true
+          }
 
-          X86_64_KSUD=$(find artifacts/ksud-x86_64-linux-android \
-            -type f -name ksud | head -n 1)
+          ARM64_KSUD=$(find_ksud "aarch64-linux-android")
+          ARM_KSUD=$(find_ksud "armv7-linux-androideabi")
+          X86_64_KSUD=$(find_ksud "x86_64-linux-android")
+          RISCV64_KSUD=$(find_ksud "riscv64-linux-android")
 
-          RISCV64_KSUD=$(find artifacts/ksud-riscv64-linux-android \
-            -type f -name ksud | head -n 1)
-
-          test -n "$ARM64_KSUD"
-          test -n "$ARM_KSUD"
-          test -n "$X86_64_KSUD"
-          test -n "$RISCV64_KSUD"
-
-          cp -f "$ARM64_KSUD" \
-            target/aarch64-linux-android/release/ksud
-
-          cp -f "$ARM_KSUD" \
-            target/armv7-linux-androideabi/release/ksud
-
-          cp -f "$X86_64_KSUD" \
-            target/x86_64-linux-android/release/ksud
-
-          cp -f "$RISCV64_KSUD" \
-            target/riscv64-linux-android/release/ksud
+          [ -n "$ARM64_KSUD" ] && cp -f "$ARM64_KSUD" target/aarch64-linux-android/release/ksud || touch target/aarch64-linux-android/release/ksud
+          [ -n "$ARM_KSUD" ] && cp -f "$ARM_KSUD" target/armv7-linux-androideabi/release/ksud || touch target/armv7-linux-androideabi/release/ksud
+          [ -n "$X86_64_KSUD" ] && cp -f "$X86_64_KSUD" target/x86_64-linux-android/release/ksud || touch target/x86_64-linux-android/release/ksud
+          [ -n "$RISCV64_KSUD" ] && cp -f "$RISCV64_KSUD" target/riscv64-linux-android/release/ksud || touch target/riscv64-linux-android/release/ksud
 
       # --------------------------------------------------------
       # Prepare signing inputs

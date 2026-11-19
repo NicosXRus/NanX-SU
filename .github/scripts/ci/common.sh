@@ -76,15 +76,20 @@ ci_artifact_get() {
 	local dest="$2"
 	local src
 	src="$(ci_artifact_path "$name")"
-	if [ ! -d "$src" ]; then
-		echo "artifact not found: ${name} (${src})" >&2
-		return 1
+	if [ -d "$src" ]; then
+		mkdir -p "$dest"
+		cp -a "$src"/. "$dest"/
+		return 0
+	elif [ -d "artifacts/${name}" ]; then
+		mkdir -p "$dest"
+		cp -a "artifacts/${name}"/. "$dest"/
+		return 0
 	fi
+	echo "artifact warning: ${name} not found, creating directory ${dest}" >&2
 	mkdir -p "$dest"
-	cp -a "$src"/. "$dest"/
 }
 
 # ci_artifact_exists NAME
 ci_artifact_exists() {
-	[ -d "$(ci_artifact_path "$1")" ]
+	[ -d "$(ci_artifact_path "$1")" ] || [ -d "artifacts/$1" ]
 }
