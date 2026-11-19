@@ -61,7 +61,7 @@ jobs:
         working-directory: ./manager
 
     env:
-      GRADLE_USER_HOME: /ci/tools/gradle
+      GRADLE_USER_HOME: ${{ github.workspace }}/.gradle
 
     steps:
 

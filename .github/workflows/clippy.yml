@@ -32,8 +32,8 @@ on:
 
 env:
   RUSTFLAGS: '-Dwarnings'
-  CARGO_HOME: /ci/tools/cargo
-  RUSTUP_HOME: /usr/local/rustup
+  CARGO_HOME: ${{ github.workspace }}/.cargo
+  RUSTUP_HOME: ${{ github.workspace }}/.rustup
   # Cap per-job parallelism: several job containers run at once.
   CARGO_BUILD_JOBS: "6"
 

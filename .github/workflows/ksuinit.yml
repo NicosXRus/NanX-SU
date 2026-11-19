@@ -14,8 +14,8 @@ jobs:
   build:
     runs-on: ${{ inputs.os }}
     env:
-      CARGO_HOME: /ci/tools/cargo
-      RUSTUP_HOME: /usr/local/rustup
+      CARGO_HOME: ${{ github.workspace }}/.cargo
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup
       # Same reason as MAKEFLAGS in ddk-lkm: cap per-job parallelism.
       CARGO_BUILD_JOBS: "6"
     steps:
@@ -82,8 +82,8 @@ jobs:
   build-riscv64:
     runs-on: ${{ inputs.os }}
     env:
-      CARGO_HOME: /ci/tools/cargo
-      RUSTUP_HOME: /usr/local/rustup
+      CARGO_HOME: ${{ github.workspace }}/.cargo
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup
     steps:
       - name: Checkout
         uses: actions/checkout@v4

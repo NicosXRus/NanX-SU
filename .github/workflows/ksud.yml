@@ -42,8 +42,8 @@ jobs:
         target: ${{ fromJson(inputs.targets_json) }}
     runs-on: ubuntu-latest
     env:
-      CARGO_HOME: /ci/tools/cargo
-      RUSTUP_HOME: /usr/local/rustup
+      CARGO_HOME: ${{ github.workspace }}/.cargo
+      RUSTUP_HOME: ${{ github.workspace }}/.rustup
     steps:
       - name: Checkout
         uses: actions/checkout@v4

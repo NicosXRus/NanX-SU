@@ -29,8 +29,8 @@ permissions:
   checks: write
 
 env:
-  RUSTUP_HOME: /usr/local/rustup
-  CARGO_HOME: /ci/tools/cargo
+  RUSTUP_HOME: ${{ github.workspace }}/.rustup
+  CARGO_HOME: ${{ github.workspace }}/.cargo
 
 jobs:
   format:
