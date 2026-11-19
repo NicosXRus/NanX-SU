@@ -281,7 +281,7 @@ jobs:
             assembleRelease ${PR_BUILD_FLAG:+-PIS_PR_BUILD=true}
 
       # --------------------------------------------------------
-      # Upload un-repacked APK
+      # Upload APK Artifacts
       # --------------------------------------------------------
 
       - name: Upload Gradle APK
@@ -290,6 +290,12 @@ jobs:
           . "${GITHUB_WORKSPACE}/.github/scripts/ci/common.sh"
           ci_artifact_put "${{ steps.determine.outputs.title }}-gradle" \
             "${GITHUB_WORKSPACE}/manager/app/build/outputs/apk/release/"*.apk
+
+      - name: Upload NanX-SU Manager APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NanX-SU-Manager-APK
+          path: manager/app/build/outputs/apk/release/*.apk
 
       # --------------------------------------------------------
       # Upload mappings
@@ -306,167 +312,3 @@ jobs:
           fi
           ci_artifact_put "${{ steps.determine.outputs.title }}-mappings" \
             "${GITHUB_WORKSPACE}/manager/app/build/outputs/mapping/release/"
-
-  # ------------------------------------------------------------
-  # Repack the APK
-  # ------------------------------------------------------------
-
-  repack-manager:
-    needs: [build-manager]
-
-    runs-on: ubuntu-latest
-
-    steps:
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set artifact name
-        id: determine
-        run: echo "title=Manager" >> "$GITHUB_OUTPUT"
-
-      - name: Check toolchain
-        run: |
-          set -eux
-          java -version
-          APKSIGNER=$(find ${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools -name apksigner 2>/dev/null | head -n 1 || true)
-          if [ -n "$APKSIGNER" ]; then "$APKSIGNER" --version || true; fi
-          python3 --version
-
-      - name: Download artifacts from GitHub
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-        continue-on-error: true
-
-      - name: Download artifacts
-        env:
-          ARTIFACTS_RUN: ${{ inputs.artifacts_run }}
-        run: |
-          set -eux
-          . .github/scripts/ci/common.sh
-          if [ -n "$ARTIFACTS_RUN" ] && [ -d "/ci/runs/${ARTIFACTS_RUN}" ]; then
-            cp -a "/ci/runs/${ARTIFACTS_RUN}"/* "${CI_ARTIFACT_ROOT}/" || true
-          fi
-          ci_artifact_get "${{ steps.determine.outputs.title }}-gradle" artifacts/manager-gradle
-          for t in aarch64-linux-android armv7-linux-androideabi x86_64-linux-android riscv64-linux-android; do
-            ci_artifact_get "ksud-${t}" "artifacts/ksud-${t}"
-          done
-
-      # --------------------------------------------------------
-      # Place Manager APK and ksud artifacts
-      # --------------------------------------------------------
-
-      - name: Place manager apk and ksud artifacts
-        id: place_artifacts
-        run: |
-          set -e
-
-          mkdir -p manager/app/build/outputs/apk/release
-          mkdir -p target/aarch64-linux-android/release
-          mkdir -p target/armv7-linux-androideabi/release
-          mkdir -p target/x86_64-linux-android/release
-          mkdir -p target/riscv64-linux-android/release
-
-          APK=$(find artifacts/manager-gradle -type f -name "*.apk" 2>/dev/null | head -n 1 || true)
-          if [ -n "$APK" ]; then
-            echo "APK_STEM=$(basename "$APK" .apk)" >> "$GITHUB_OUTPUT"
-            cp -f "$APK" manager/app/build/outputs/apk/release/
-          else
-            echo "APK_STEM=Manager" >> "$GITHUB_OUTPUT"
-          fi
-
-          find_ksud() {
-            local arch="$1"
-            find artifacts/ksud-"$arch" artifacts -type f -name ksud 2>/dev/null | grep "$arch" | head -n 1 || true
-          }
-
-          ARM64_KSUD=$(find_ksud "aarch64-linux-android")
-          ARM_KSUD=$(find_ksud "armv7-linux-androideabi")
-          X86_64_KSUD=$(find_ksud "x86_64-linux-android")
-          RISCV64_KSUD=$(find_ksud "riscv64-linux-android")
-
-          [ -n "$ARM64_KSUD" ] && cp -f "$ARM64_KSUD" target/aarch64-linux-android/release/ksud || touch target/aarch64-linux-android/release/ksud
-          [ -n "$ARM_KSUD" ] && cp -f "$ARM_KSUD" target/armv7-linux-androideabi/release/ksud || touch target/armv7-linux-androideabi/release/ksud
-          [ -n "$X86_64_KSUD" ] && cp -f "$X86_64_KSUD" target/x86_64-linux-android/release/ksud || touch target/x86_64-linux-android/release/ksud
-          [ -n "$RISCV64_KSUD" ] && cp -f "$RISCV64_KSUD" target/riscv64-linux-android/release/ksud || touch target/riscv64-linux-android/release/ksud
-
-      # --------------------------------------------------------
-      # Prepare signing inputs
-      # --------------------------------------------------------
-
-      - name: Prepare signing inputs
-        env:
-          PR_KEYSTORE: ${{ inputs.keystore }}
-          PR_KEYSTORE_PASSWORD: ${{ inputs.keystore_password }}
-          PR_KEY_PASSWORD: ${{ inputs.key_password }}
-
-          PROD_KEYSTORE: ${{ vars.KEYSTORE || secrets.KEYSTORE }}
-          PROD_KEY_ALIAS: ${{ vars.KEY_ALIAS || secrets.KEY_ALIAS }}
-          PROD_KEYSTORE_PASSWORD: ${{ vars.KEYSTORE_PASSWORD || secrets.KEYSTORE_PASSWORD }}
-          PROD_KEY_PASSWORD: ${{ vars.KEY_PASSWORD || secrets.KEY_PASSWORD }}
-        run: |
-          set -eu
-          if [ -n "$PR_KEYSTORE" ]; then
-
-            echo "$PR_KEYSTORE" | base64 -d > pr-key.jks
-
-            echo "SIGN_KEYSTORE_FILE=pr-key.jks" >> "$GITHUB_ENV"
-            echo "SIGN_KEY_ALIAS=pr-key" >> "$GITHUB_ENV"
-            echo "SIGN_KEYSTORE_PASSWORD=$PR_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
-            echo "SIGN_KEY_PASSWORD=$PR_KEY_PASSWORD" >> "$GITHUB_ENV"
-
-          else
-
-            test -n "$PROD_KEYSTORE"
-
-            echo "$PROD_KEYSTORE" | base64 -d > key.jks
-
-            echo "SIGN_KEYSTORE_FILE=key.jks" >> "$GITHUB_ENV"
-            echo "SIGN_KEY_ALIAS=$PROD_KEY_ALIAS" >> "$GITHUB_ENV"
-            echo "SIGN_KEYSTORE_PASSWORD=$PROD_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
-            echo "SIGN_KEY_PASSWORD=$PROD_KEY_PASSWORD" >> "$GITHUB_ENV"
-
-          fi
-
-      # --------------------------------------------------------
-      # Repack and resign
-      # --------------------------------------------------------
-
-      - name: Repack and resign
-        run: |
-          set -eu
-          OUTPUT_NAME="${{ steps.place_artifacts.outputs.APK_STEM }}"
-
-          python3 repack_apk.py repack \
-            -b release \
-            -t release \
-            -a arm64-v8a \
-            -a armeabi-v7a \
-            -a x86_64 \
-            -a riscv64 \
-            -K "$SIGN_KEYSTORE_FILE" \
-            -A "$SIGN_KEY_ALIAS" \
-            -P "$SIGN_KEYSTORE_PASSWORD" \
-            -S "$SIGN_KEY_PASSWORD" \
-            --strip \
-            --output-name "$OUTPUT_NAME"
-
-      # --------------------------------------------------------
-      # Upload final APK
-      # --------------------------------------------------------
-
-      - name: Upload build artifact
-        run: |
-          set -eux
-          . .github/scripts/ci/common.sh
-          ci_artifact_put "${{ steps.determine.outputs.title }}" \
-            dist/*.apk
-
-      - name: Upload Manager APK artifact to GitHub
-        uses: actions/upload-artifact@v4
-        with:
-          name: NanX-SU-Manager-APK
-          path: dist/*.apk
