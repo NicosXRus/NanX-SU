@@ -169,7 +169,7 @@ impl Ext4Writer {
             }
         }
 
-        let mut file_blocks = Vec::new();
+        let mut file_blocks: Vec<(u32, Vec<u8>)> = Vec::new();
         let mut inodes = Vec::new();
 
         // Build inodes and write file data blocks
@@ -178,19 +178,21 @@ impl Ext4Writer {
 
             let (block_ptr, file_size) = match &node.node_type {
                 VfsNodeType::RegularFile { content } => {
-                    file_size = content.len() as u32;
-                    block_ptr = current_block;
+                    let file_size = content.len() as u32;
+                    let block_ptr = current_block;
                     file_blocks.push((block_ptr, content.clone()));
 
                     let blocks_count = (content.len() + EXT4_BLOCK_SIZE - 1) / EXT4_BLOCK_SIZE;
                     current_block += blocks_count as u32;
+                    (block_ptr, file_size)
                 }
                 VfsNodeType::Symlink { target } => {
                     let bytes = target.as_bytes();
-                    file_size = bytes.len() as u32;
-                    block_ptr = current_block;
+                    let file_size = bytes.len() as u32;
+                    let block_ptr = current_block;
                     file_blocks.push((block_ptr, bytes.to_vec()));
                     current_block += 1;
+                    (block_ptr, file_size)
                 }
                 VfsNodeType::Directory { .. } => {
                     // Generate EXT4 directory entries block
@@ -250,16 +252,14 @@ impl Ext4Writer {
                         }
                     }
 
-                    file_size = dir_block.len() as u32;
-                    block_ptr = current_block;
+                    let file_size = dir_block.len() as u32;
+                    let block_ptr = current_block;
                     file_blocks.push((block_ptr, dir_block));
                     current_block += 1;
+                    (block_ptr, file_size)
                 }
-                VfsNodeType::WhiteoutDevice => {
-                    file_size = 0;
-                    block_ptr = 0;
-                }
-            }
+                VfsNodeType::WhiteoutDevice => (0u32, 0u32),
+            };
 
             let mut i_block = [0u32; 15];
             if block_ptr > 0 {
