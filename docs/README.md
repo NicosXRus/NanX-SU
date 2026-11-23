@@ -105,3 +105,4 @@ PRs are welcome; for translations please go to [Weblate](https://hosted.weblate.
 - [genuine](https://github.com/brevent/genuine/): apk v2 signature verification.
 - [Diamorphine](https://github.com/m0nad/Diamorphine): some rootkit tricks.
 </details>
+хуй
